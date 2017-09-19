@@ -62,7 +62,7 @@ else:
 nwords = corpus.word_dict.nwords
 ntags = corpus.pos_dict.nwords
 model = RNNModel(nwords, ntags, args.emsize, args.nhid, 
-                 args.nlayers, args.dropout)
+                 args.nlayers, args.dropout, bi=args.bi)
 if args.cuda:
     model = model.cuda()
 

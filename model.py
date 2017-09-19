@@ -10,7 +10,8 @@ class RNNModel(nn.Module):
         super().__init__()
         self.drop = nn.Dropout(dropout)
         self.embed = nn.Embedding(ntoken, ninp)
-        self.rnn = nn.LSTM(ninp, nhid, nlayers)
+        
+        self.rnn = nn.LSTM(ninp, nhid, nlayers, bidirectional=True)
         self.linear = nn.Linear(nhid*(1+int(bi)), nout)
 
         self.nhid = nhid
