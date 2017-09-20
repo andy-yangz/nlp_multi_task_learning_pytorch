@@ -35,6 +35,8 @@ parser.add_argument('--seq_len', type=int, default=15,
                     help='sequence length')
 parser.add_argument('--dropout', type=float, default=0.2,
                     help='dropout rate')
+parser.add_argument('--rnn_type', type=str, default='LSTM',
+                    help='RNN Cell types, among LSTM, GRU, and Elman')
 parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
 parser.add_argument('--bi', action='store_true',
@@ -56,21 +58,9 @@ if os.path.exists(corpus_path):
 else:
     corpus = Corpus(args.data)
     torch.save(corpus, corpus_path)
-###############################################################################
-# Build Model
-###############################################################################
-nwords = corpus.word_dict.nwords
-ntags = corpus.pos_dict.nwords
-model = RNNModel(nwords, ntags, args.emsize, args.nhid, 
-                 args.nlayers, args.dropout, bi=args.bi)
-if args.cuda:
-    model = model.cuda()
-
-optimizer = optim.Adam(model.parameters(), lr=args.lr)
-criterion = nn.CrossEntropyLoss()
 
 ###############################################################################
-# Training
+# Training Funcitons
 ###############################################################################
 
 def train(loss_log):
@@ -123,51 +113,72 @@ def evaluate(source, target):
         hidden = repackage_hidden(hidden)
     return total_loss/n_iteration, accuracy
 
+best_val_accuracies = []
+test_accuracies = []
+best_epoches = []
+test_times = 5
+patience = 25 #How many epoch if the accuracy have no change use early stopping
+for i in range(test_times):
+###############################################################################
+# Build Model
+###############################################################################
+    nwords = corpus.word_dict.nwords
+    ntags = corpus.pos_dict.nwords
+    model = RNNModel(nwords, ntags, args.emsize, args.nhid, 
+                    args.nlayers, args.dropout, bi=args.bi)
+    if args.cuda:
+        model = model.cuda()
 
-# Loop over epochs
-best_val_loss = None
-best_accuracy = None
-best_epoch = 0
-loss_log =[]
-early_stop_count = 0
-# You can break training early by Ctr+C
-try:
-    for epoch in range(1, args.epochs+1):
-        epoch_start_time = time.time()
-        print('Begin training...')
-        loss_log = train(loss_log)
-        val_loss, accuracy = evaluate(corpus.word_valid, corpus.pos_valid)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    criterion = nn.CrossEntropyLoss()
+
+    # Loop over epochs
+    best_val_loss = None
+    best_accuracy = None
+    best_epoch = 0
+    early_stop_count = 0
+    loss_log = []
+    # You can break training early by Ctr+C
+    try:
+        for epoch in range(1, args.epochs+1):
+            epoch_start_time = time.time()
+            print('Begin training...')
+            loss_log = train(loss_log)
+            val_loss, accuracy = evaluate(corpus.word_valid, corpus.pos_valid)
+            print('-'*50)
+            print('| end of epoch {:3d} | valid loss {:5.3f} | accuracy {:5.3f} |'.format(
+                epoch, val_loss.data.cpu().numpy()[0], accuracy
+            ))
+            if not best_val_loss or (val_loss.data[0] < best_val_loss):
+                with open(args.save.strip() + '.pt', 'wb') as f:
+                    torch.save(model, f)
+                best_val_loss = val_loss.data[0]
+            if not best_accuracy or (accuracy > best_accuracy):
+                best_accuracy = accuracy
+                best_epoch = epoch
+                early_stop_count = 0
+            else:
+                early_stop_count += 1
+            if early_stop_count >= patience:
+                print('\nEarly Stopping! \nBecause 20 epochs the accuracy have no improvement.')
+                break
+    except KeyboardInterrupt:
         print('-'*50)
-        print('| end of epoch {:3d} | valid loss {:5.2f} | accuracy {:5.2f} |'.format(
-            epoch, val_loss.data.cpu().numpy()[0], accuracy
-        ))
-        if not best_val_loss or (val_loss.data[0] < best_val_loss):
-            with open(args.save.strip() + '.pt', 'wb') as f:
-                torch.save(model, f)
-            best_val_loss = val_loss.data[0]
-        if not best_accuracy or (accuracy > best_accuracy):
-            best_accuracy = accuracy
-            best_epoch = epoch
-            early_stop_count = 0
-        else:
-            early_stop_count += 1
-        if early_stop_count >= 20:
-            print('\nEarly Stopping! \nBecause 20 epochs the accuracy have no improvement.')
-            break
-except KeyboardInterrupt:
-    print('-'*50)
-    print('Exiting from training early.')
+        print('Exiting from training early.')
 
+    #Load the best saved model
+    with open(args.save.strip() + '.pt', 'rb') as f:
+        model = torch.load(f)
 
-#Load the best saved model
-with open(args.save.strip() + '.pt', 'rb') as f:
-    model = torch.load(f)
-
-test_loss, test_accuracy = evaluate(corpus.word_test, corpus.pos_test)
-print('='*50)
-print('| End of training | test loss: {:5.2f} | test acccuracy: {:5.2f}'.format(
-    test_loss.data.cpu().numpy()[0], test_accuracy
-))
+    test_loss, test_accuracy = evaluate(corpus.word_test, corpus.pos_test)
+    print('='*50)
+    print('| End of training | test loss: {:5.2f} | test acccuracy: {:5.2f}'.format(
+        test_loss.data.cpu().numpy()[0], test_accuracy))
+    
+    # Log Accuracy
+    best_val_accuracies.append(best_accuracy)
+    test_accuracies.append(test_accuracy)
+    best_epoches.append(best_epoch)
 
 # Save results
 results = {
@@ -176,10 +187,14 @@ results = {
     'best_val_loss': best_val_loss,
     'best_accuracy': best_accuracy,
     'test_accuracy': test_accuracy,
-    'loss_log': loss_log
+    'loss_log': loss_log,
+
+    'best_val_accuracies': best_val_accuracies,
+    'test_accuracies': test_accuracies,
+    'best_epoches': best_epoches
 }
-torch.save(results, '%s_emsize%d_nlayers%d_nhid%d_dropout%3.1f_seqlen%d_bi%d_result.pt' \
+torch.save(results, '%s_emsize%d_nlayers%d_nhid%d_dropout%3.1f_seqlen%d_bi%d_%s_result.pt' \
                     %(args.save.strip(), args.emsize, args.nlayers, args.nhid,
-                      args.dropout, args.seq_len, args.bi))
+                      args.dropout, args.seq_len, args.bi, args.rnn_type))
 
             

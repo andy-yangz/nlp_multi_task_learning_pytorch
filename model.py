@@ -10,8 +10,15 @@ class RNNModel(nn.Module):
         super().__init__()
         self.drop = nn.Dropout(dropout)
         self.embed = nn.Embedding(ntoken, ninp)
-        
-        self.rnn = nn.LSTM(ninp, nhid, nlayers, bidirectional=True)
+        self.rnn_type = rnn_type
+
+        # Select RNN cell type from LSTM, GRU, and Elman
+        if rnn_type == 'LSTM':
+            self.rnn = nn.LSTM(ninp, nhid, nlayers, bidirectional=bi)
+        elif rnn_type == 'GRU':
+            self.rnn = nn.GRU(ninp, nhid, nlayers, bidirectional=bi)
+        else:
+            self.rnn = nn.RNN(ninp, nhid, nlayers, bidirectional=bi)
         self.linear = nn.Linear(nhid*(1+int(bi)), nout)
 
         self.nhid = nhid
