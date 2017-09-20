@@ -6,7 +6,7 @@ class RNNModel(nn.Module):
     """Model include a transducer to predict at each time steps"""
 
     def __init__(self, ntoken, nout, ninp, nhid,
-                 nlayers=1, dropout=0.5, rnn_type='LSTM',bi=False):
+                 nlayers=1, dropout=0.5, rnn_type='LSTM', bi=False):
         super().__init__()
         self.drop = nn.Dropout(dropout)
         self.embed = nn.Embedding(ntoken, ninp)

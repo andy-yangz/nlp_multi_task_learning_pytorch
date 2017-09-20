@@ -43,6 +43,8 @@ parser.add_argument('--bi', action='store_true',
                     help='use bidirection RNN')
 parser.add_argument('--log_interval', type=int, default=200, metavar='N',
                     help='report interval')
+parser.add_argument('--train_mode', type=str, default='Joint',
+                    help='Training mode of model from POS, Chunk, to Joint.')
 parser.add_argument('--save', type=str, default='model.pt',
                     help='path to save the final model')
 args = parser.parse_args()
@@ -64,12 +66,19 @@ else:
 ###############################################################################
 
 def train(loss_log):
+    
+    if args.train_mode == 'POS':
+        target_data = corpus.pos_train
+    elif args.train_mode == 'Chunk':
+        target_data = corpus.chunk_train
+
     # Turn on training mode
     total_loss = 0
     start_time = time.time()
     n_iteration = corpus.word_train.size(0) // (args.batch_size*args.seq_len) 
     iteration = 0
-    for X, y in get_batch(corpus.word_train, corpus.pos_train,
+    
+    for X, y in get_batch(corpus.word_train, target_data,
                           args.batch_size, args.seq_len, args.cuda):
         iteration += 1
         model.zero_grad()
@@ -116,7 +125,7 @@ def evaluate(source, target):
 best_val_accuracies = []
 test_accuracies = []
 best_epoches = []
-test_times = 5
+test_times = 1
 patience = 25 #How many epoch if the accuracy have no change use early stopping
 for i in range(test_times):
 ###############################################################################
@@ -144,7 +153,13 @@ for i in range(test_times):
             epoch_start_time = time.time()
             print('Begin training...')
             loss_log = train(loss_log)
-            val_loss, accuracy = evaluate(corpus.word_valid, corpus.pos_valid)
+            # Evaluation
+            print('Evaluating on the valid data')
+            if args.train_mode == 'POS':
+                valid_target_data = corpus.pos_valid 
+            elif args.train_mode == 'Chunk':
+                valid_target_data = corpus.chunk_valid 
+            val_loss, accuracy = evaluate(corpus.word_valid, valid_target_data)
             print('-'*50)
             print('| end of epoch {:3d} | valid loss {:5.3f} | accuracy {:5.3f} |'.format(
                 epoch, val_loss.data.cpu().numpy()[0], accuracy
@@ -160,7 +175,7 @@ for i in range(test_times):
             else:
                 early_stop_count += 1
             if early_stop_count >= patience:
-                print('\nEarly Stopping! \nBecause 20 epochs the accuracy have no improvement.')
+                print('\nEarly Stopping! \nBecause %d epochs the accuracy have no improvement.'%(patience))
                 break
     except KeyboardInterrupt:
         print('-'*50)
@@ -170,7 +185,11 @@ for i in range(test_times):
     with open(args.save.strip() + '.pt', 'rb') as f:
         model = torch.load(f)
 
-    test_loss, test_accuracy = evaluate(corpus.word_test, corpus.pos_test)
+    if args.train_mode == 'POS':
+        test_target_data = corpus.pos_test
+    elif args.train_mode == 'Chunk':
+        test_target_data = corpus.chunk_test
+    test_loss, test_accuracy = evaluate(corpus.word_test, test_target_data)
     print('='*50)
     print('| End of training | test loss: {:5.2f} | test acccuracy: {:5.2f}'.format(
         test_loss.data.cpu().numpy()[0], test_accuracy))

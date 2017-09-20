@@ -11,6 +11,9 @@ def get_batch(source, target, batch_size, seq_len=10, cuda=False, evalu=False):
     # Make batch shape
     source = source.view(batch_size, -1).t().contiguous()
     target = target.view(batch_size, -1).t().contiguous()
+    shuffle_mask = torch.randperm(batch_size)
+    source = source[:, shuffle_mask]
+    target = target[:, shuffle_mask]
     if cuda:
         source, target = source.cuda(), target.cuda()
     for i in range(source.size(0) // seq_len):
