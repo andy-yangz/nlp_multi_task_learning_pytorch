@@ -45,6 +45,8 @@ parser.add_argument('--log_interval', type=int, default=200, metavar='N',
                     help='report interval')
 parser.add_argument('--train_mode', type=str, default='Joint',
                     help='Training mode of model from POS, Chunk, to Joint.')
+parser.add_argument('--test_times', type=int, default=1,
+                    help='run several times to get trustable result.')
 parser.add_argument('--save', type=str, default='model.pt',
                     help='path to save the final model')
 args = parser.parse_args()
@@ -125,14 +127,17 @@ def evaluate(source, target):
 best_val_accuracies = []
 test_accuracies = []
 best_epoches = []
-test_times = 1
 patience = 25 #How many epoch if the accuracy have no change use early stopping
-for i in range(test_times):
+for i in range(args.test_times):
 ###############################################################################
 # Build Model
 ###############################################################################
     nwords = corpus.word_dict.nwords
-    ntags = corpus.pos_dict.nwords
+    if args.train_mode == 'POS':
+        ntags = corpus.pos_dict.nwords
+    elif args.train_mode == 'Chunk':
+        ntags = corpus.chunk_dict.nwords
+    
     model = RNNModel(nwords, ntags, args.emsize, args.nhid, 
                     args.nlayers, args.dropout, bi=args.bi)
     if args.cuda:
