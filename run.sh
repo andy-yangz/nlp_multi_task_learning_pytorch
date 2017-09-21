@@ -1,32 +1,62 @@
 echo "Running Model"
 
-echo "POS tagging"
+echo "POS"
 python main.py --data './data' \
         --emsize 256 \
-        --nlayers 1 \
+        --npos_layers 2 \
+        --nchunk_layers 0 \
         --nhid 128 \
         --batch_size 128 \
         --seq_len 10 \
         --cuda \
         --train_mode 'POS' \
-        --test_times 10 \
-        --epochs 500 \
+        --epochs 300 \
         --log_interval 20 \
         --save './result/pos_model'
 
-echo "Chunking"
+echo "Chunk"
 python main.py --data './data' \
         --emsize 256 \
-        --nlayers 1 \
+        --npos_layers 0 \
+        --nchunk_layers 2 \
         --nhid 128 \
         --batch_size 128 \
         --seq_len 10 \
         --cuda \
         --train_mode 'Chunk' \
-        --test_times 10 \
-        --epochs 500 \
+        --epochs 300 \
         --log_interval 20 \
         --save './result/chunk_model'
+
+echo "Joint Training on the same level"
+python main.py --data './data' \
+        --emsize 256 \
+        --npos_layers 2 \
+        --nchunk_layers 2 \
+        --nhid 128 \
+        --batch_size 128 \
+        --seq_len 10 \
+        --cuda \
+        --train_mode 'Joint' \
+        --epochs 300 \
+        --log_interval 20 \
+        --save './result/joint_same'
+
+echo "Joint Training on the different level"
+python main.py --data './data' \
+        --emsize 256 \
+        --npos_layers 1 \
+        --nchunk_layers 2 \
+        --nhid 128 \
+        --batch_size 128 \
+        --seq_len 10 \
+        --cuda \
+        --train_mode 'Joint' \
+        --epochs 300 \
+        --log_interval 20 \
+        --save './result/joint_diff'
+
+
 
 # echo "Embedding size"
 # for emsize in 128 256 512 
