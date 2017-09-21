@@ -45,13 +45,13 @@ python main.py --data './data' \
 echo "Joint Training on the different level"
 python main.py --data './data' \
         --emsize 256 \
-        --npos_layers 2 \
+        --npos_layers 1 \
         --nchunk_layers 2 \
         --nhid 128 \
         --batch_size 128 \
         --seq_len 10 \
         --cuda \
-        --train_mode 'Jopint' \
+        --train_mode 'Joint' \
         --epochs 300 \
         --log_interval 20 \
         --save './result/joint_diff'
