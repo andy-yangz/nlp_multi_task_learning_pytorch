@@ -21,44 +21,54 @@ class Dictionary(object):
 
 
 class Corpus(object):
-    def __init__(self, path):
+    def __init__(self, path, lang_name):
+        
+        self.lang_name = lang_name
+        # Create Dictionaries
         self.word_dict = Dictionary('Word')
         self.pos_dict = Dictionary('POS')
-        self.chunk_dict = Dictionary('Chunk')
+        self.dep_dict = Dictionary('Dependency')
 
-        self.word_train, self.pos_train, self.chunk_train = self.tokenize(os.path.join(path, 'train.txt'))
-        self.word_valid, self.pos_valid, self.chunk_valid = self.tokenize(os.path.join(path, 'valid.txt'))
-        self.word_test, self.pos_test, self.chunk_test = self.tokenize(os.path.join(path, 'test.txt'))
-
+        self.word_train, self.pos_train, self.dep_train = self.tokenize(os.path.join(path, 'train.conllu'))
+        self.word_valid, self.pos_valid, self.dep_valid = self.tokenize(os.path.join(path, 'dev.conllu'))
+        self.word_test, self.pos_test, self.dep_test = self.tokenize(os.path.join(path, 'test.conllu'))
+        
     def tokenize(self, path):
         "Tokenizes text data file"
+        sentences_word_ids = []
+        sentences_pos_ids = []
+        sentences_dep_ids = []
+        sentence_word = []
+        sentence_pos = []
+        sentence_dep = []
         assert os.path.exists(path)
         # Build the dictionaries from corpus
+        print('Loadind Data...')
         with open(path, 'r') as f:
-            tokens = 0
             for line in f:
-                try: 
-                    word, pos, chunk = line.strip().split()
-                except: 
+                # Ignore comments lines
+                if line[0] == '#':
                     continue
-                tokens += 1
-                self.word_dict.add_word(word)
-                self.pos_dict.add_word(pos)
-                self.chunk_dict.add_word(chunk)
+                row = line.strip().split()
+                if len(row) != 0:
+                    print(row)
+                    sentence_word.append(row[1])
+                    sentence_pos.append(row[3])
+                    sentence_dep.append((row[6], row[7]))
+                    self.word_dict.add_word(row[1])
+                    self.pos_dict.add_word(row[3])
+                    self.dep_dict.add_word(row[7])
+                else: 
+                    # Encode sentence
+                    sentence_word_id = torch.LongTensor([self.word_dict.word2idx[word] for word in sentence_word])
+                    sentence_pos_id = torch.LongTensor([self.pos_dict.word2idx[pos] for pos in sentence_pos])
+                    sentence_dep_id = torch.LongTensor([self.dep_dict.word2idx[dep[1]] for dep in sentence_dep])
+                    # Append sentence
+                    sentences_word_ids.append(sentence_word_id)
+                    sentences_pos_ids.append(sentence_pos_id)
+                    sentences_dep_ids.append(sentence_dep_id)
+                    sentence_word = []
+                    sentence_pos = []
+                    sentence_dep = []                    
 
-        with open(path, 'r') as f:
-            word_ids = torch.LongTensor(tokens)
-            pos_ids = torch.LongTensor(tokens)
-            chunk_ids = torch.LongTensor(tokens)
-            token = 0
-            for line in f:
-                try: 
-                    word, pos, chunk = line.strip().split()
-                except: 
-                    continue
-                word_ids[token] = self.word_dict.word2idx[word]
-                pos_ids[token] = self.pos_dict.word2idx[pos]
-                chunk_ids[token] = self.chunk_dict.word2idx[chunk]
-                token += 1
-
-        return word_ids, pos_ids, chunk_ids
+        return sentences_word_ids, sentences_pos_ids, sentences_dep_ids
