@@ -93,20 +93,24 @@ class JointModel(nn.Module):
                                         dropout, rnn_type, bi)
             else:
                 # Lower layer
-                self.rnn1 = EncoderModel(ntoken, emsize, nhid, self.nlayers1, 
-                                         dropout, rnn_type, bi)
+                if self.nlayers1 < self.nlayers2: 
+                    self.rnn1 = EncoderModel(ntoken, emsize, nhid, self.nlayers1, 
+                                            dropout, rnn_type, bi)
+                else:
+                    self.rnn1 = EncoderModel(ntoken, emsize, nhid, self.nlayers2, 
+                                            dropout, rnn_type, bi)                    
                 # Higher layer
                 if rnn_type == 'LSTM':
                     self.rnn2 = nn.LSTM(nhid*(1+int(bi)), nhid, 
-                                        self.nlayers2 - self.nlayers1, 
+                                        abs(self.nlayers2 - self.nlayers1), 
                                         bidirectional=bi)
                 elif rnn_type == 'GRU':
                     self.rnn2 = nn.GRU(nhid*(1+int(bi)), nhid, 
-                                       self.nlayers2 - self.nlayers1, 
+                                       abs(self.nlayers2 - self.nlayers1), 
                                        bidirectional=bi)
                 else:
                     self.rnn2 = nn.RNN(nhid*(1+int(bi)), nhid, 
-                                       self.nlayers2 - self.nlayers1, 
+                                       abs(self.nlayers2 - self.nlayers1), 
                                        bidirectional=bi)
 
             # Decoders for two tasks
@@ -131,8 +135,13 @@ class JointModel(nn.Module):
                 logits1, hidden1 = self.rnn1(input, hidden[0])
                 self.rnn2.flatten_parameters()
                 logits2, hidden2 = self.rnn2(logits1, hidden[1])
-                outputs1 = self.linear1(logits1)
-                outputs2 = self.linear2(logits2)
+                # If nlayers fewer, then use lower logits
+                if self.nlayers1 < self.nlayers2:
+                    outputs1 = self.linear1(logits1)
+                    outputs2 = self.linear2(logits2)
+                else:
+                    outputs1 = self.linear1(logits2)
+                    outputs2 = self.linear2(logits1)
                 return outputs1, outputs2, hidden1, hidden2
         else:
             logits, hidden = self.rnn(input, hidden[0])            
@@ -141,8 +150,8 @@ class JointModel(nn.Module):
 
     def init_rnn2_hidden(self, batch_size):
         weight = next(self.rnn2.parameters()).data
-        return (Variable(weight.new((self.nlayers2 - self.nlayers1)*(1+int(self.bi)), 
+        return (Variable(weight.new(abs(self.nlayers2 - self.nlayers1)*(1+int(self.bi)), 
                                     batch_size, self.nhid).zero_()),
-                Variable(weight.new((self.nlayers2 - self.nlayers1)*(1+int(self.bi)), 
+                Variable(weight.new(abs(self.nlayers2 - self.nlayers1)*(1+int(self.bi)), 
                                     batch_size, self.nhid).zero_()))
         
