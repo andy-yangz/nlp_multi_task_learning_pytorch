@@ -1,34 +1,48 @@
 import torch
+from random import shuffle
 from torch.autograd import Variable
 
+PAD_token = 0
 
-def get_batch(source, *targets, batch_size, seq_len=10, cuda=False, evalu=False):
-    """Generate batch from the raw data."""
-    nbatch = source.size(0) // batch_size
-    shuffle_mask = torch.randperm(batch_size)
-    # Trim extra elements doesn't fit well
-    source = source.narrow(0, 0, nbatch*batch_size)
-    # Make batch shape
-    source = source.view(batch_size, -1).t().contiguous()
-    # Shuffle 
-    source = source[:, shuffle_mask]
-    if cuda:
-        source = source.cuda()
-    
-    targets = list(targets)
-    for i in range(len(targets)):
-        targets[i] = targets[i].narrow(0, 0, nbatch*batch_size)
-        targets[i] = targets[i].view(batch_size, -1).t().contiguous()
-        targets[i] = targets[i][:, shuffle_mask]
+
+def get_batch(source, pos_target, dep_target, batch_size, cuda=False):
+    """A generator to get batch for the data."""
+    tmp = list(zip(source, pos_target, dep_target))
+    shuffle(tmp)
+    source, pos_target, dep_target = zip(*tmp)
+
+    n_batch = (len(source) // batch_size) + 1
+    for i in range(n_batch):
+        X = source[i*batch_size : (i+1)*batch_size]
+        X = Variable(torch.LongTensor(pad_batch(X)))
+        y_pos = pos_target[i*batch_size : (i+1)*batch_size]
+        y_pos = Variable(torch.LongTensor(pad_batch(y_pos)))
+        y_dep = dep_target[i*batch_size : (i+1)*batch_size]
+        y_dep = Variable(torch.LongTensor(pad_dep_batch(y_dep)))
         if cuda:
-            targets[i] = targets[i].cuda()
-    
-    for i in range(source.size(0) // seq_len):
-        ys = []
-        X = Variable(source[i*seq_len:(i+1)*seq_len], volatile=evalu)
-        for target in targets:
-            ys.append(Variable(target[i*seq_len:(i+1)*seq_len]))
-        yield X, ys
+            X = X.cuda()
+            y_pos = y_pos.cuda()
+            y_dep = y_dep.cuda()
+        yield X, y_pos, y_dep
+
+
+def pad_dep_batch(dep_batch):
+    max_length = max([len(seq) for seq in dep_batch])
+    pad_dep_batch = [pad_dep_seq(seq, max_length) for seq in dep_batch]
+    return pad_dep_batch
+
+def pad_dep_seq(seq, max_length):
+    seq += [[0, PAD_token] for i in range(max_length - len(seq))]
+    return seq   
+
+def pad_batch(batch):
+    max_length = max([len(seq) for seq in batch])
+    pad_batch = [pad_seq(seq, max_length) for seq in batch]
+    return pad_batch
+
+def pad_seq(seq, max_length):
+    seq += [PAD_token for i in range(max_length - len(seq))]
+    return seq
 
 def repackage_hidden(h):
     """Wrap hidden in the new Variable to detach it from old history."""
