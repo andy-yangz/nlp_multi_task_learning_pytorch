@@ -14,7 +14,7 @@ from model import *
 ###############################################################################
 # Set Parameters
 ###############################################################################
-parser = argparse.ArgumentParser(description='Pytorch NLP multi-task leraning for POS tagging and chunking.')
+parser = argparse.ArgumentParser(description='Pytorch NLP multi-task leraning for POS tagging and Chunking.')
 parser.add_argument('--data', type=str, default='./data',
                     help='data file')
 parser.add_argument('--emsize', type=int, default=200,
