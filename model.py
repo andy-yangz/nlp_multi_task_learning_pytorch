@@ -6,7 +6,7 @@ class EncoderModel(nn.Module):
     """Model include a transducer to predict at each time steps"""
 
     def __init__(self, ntoken, emsize, nhid,
-                 nlayers=1, dropout=0.2, rnn_type='LSTM', bi=False):
+                 nlayers=1, dropout=0.2, rnn_type='LSTM', bi=False, pretrained_vectors=None, word_dict=None):
         super().__init__()
         self.drop = nn.Dropout(dropout)
         self.embed = nn.Embedding(ntoken, emsize)
@@ -24,6 +24,11 @@ class EncoderModel(nn.Module):
         self.nhid = nhid
         self.nlayers = nlayers
         self.bi = bi
+        if pretrained_vectors is not None:
+            for x, word in enumerate(word_dict.idx2word):
+                if word in pretrained_vectors.stoi:
+                    pt_idx = pretrained_vectors.stoi[word]
+                    self.embed.weight[x].data.copy_(pretrained_vectors.vectors[pt_idx])
         
     def init_weights(self):
         init_range = 0.1
@@ -73,7 +78,7 @@ class JointModel(nn.Module):
        output and which layer we put it in. Number of tag first and 
        then number of layer."""
     def __init__(self, ntoken, emsize, nhid, *args,
-                 dropout=0.2, rnn_type='LSTM', bi=False, train_mode='Joint'):
+                 dropout=0.2, rnn_type='LSTM', bi=False, train_mode='Joint', pretrained_vectors=None, vocab=None):
         super().__init__()
         self.ntoken = ntoken
         self.emsize = emsize
@@ -90,11 +95,11 @@ class JointModel(nn.Module):
             self.nlayers2 = args[3]
             if self.nlayers1 == self.nlayers2:
                 self.rnn = EncoderModel(ntoken, emsize, nhid, self.nlayers1, 
-                                        dropout, rnn_type, bi)
+                                        dropout, rnn_type, bi, pretrained_vectors, vocab)
             else:
                 # Lower layer
                 self.rnn1 = EncoderModel(ntoken, emsize, nhid, self.nlayers1, 
-                                         dropout, rnn_type, bi)
+                                         dropout, rnn_type, bi, pretrained_vectors, vocab)
                 # Higher layer
                 if rnn_type == 'LSTM':
                     self.rnn2 = nn.LSTM(nhid*(1+int(bi)), nhid, 
@@ -102,11 +107,11 @@ class JointModel(nn.Module):
                                         bidirectional=bi)
                 elif rnn_type == 'GRU':
                     self.rnn2 = nn.GRU(nhid*(1+int(bi)), nhid, 
-                                       self.nlayers2 - self.nlayers1, 
+                                       self.nlayers2 - self.nlayers1,
                                        bidirectional=bi)
                 else:
                     self.rnn2 = nn.RNN(nhid*(1+int(bi)), nhid, 
-                                       self.nlayers2 - self.nlayers1, 
+                                       self.nlayers2 - self.nlayers1,
                                        bidirectional=bi)
 
             # Decoders for two tasks
@@ -117,7 +122,7 @@ class JointModel(nn.Module):
             self.ntags = args[0]
             self.nlayers = args[1]
             self.rnn = EncoderModel(ntoken, emsize, nhid, self.nlayers, 
-                                    dropout, rnn_type, bi)
+                                    dropout, rnn_type, bi, pretrained_vectors, vocab)
             self.linear = LinearDecoder(nhid, self.ntags, bi)
         
     def forward(self, input, *hidden):
