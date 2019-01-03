@@ -1,15 +1,12 @@
 import argparse
 import os
 import time
-import math
-import torch
-import torch.nn as nn
-from torch.autograd import Variable
+
 from torch import optim
 
 from data import Corpus
-from util import *
 from model import *
+from util import *
 
 ###############################################################################
 # Set Parameters
@@ -51,8 +48,12 @@ parser.add_argument('--test_times', type=int, default=1,
                     help='run several times to get trustable result.')
 parser.add_argument('--save', type=str, default='model.pt',
                     help='path to save the final model')
+parser.add_argument('--seed', type=int, default=123,
+                    help='Seed for torch.')
 args = parser.parse_args()
 
+torch.manual_seed(args.seed)
+torch.cuda.manual_seed_all(args.seed)
 
 ###############################################################################
 # Load Data
