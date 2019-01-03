@@ -36,7 +36,8 @@ mkdir result/
 bash run.sh data/pos_chunk/
 ```
 
-This will create a folder called result/ containing all the pth files containing the models/results.
+This will create a folder called result/ containing all the pth files containing the models/results. Change data/pos_chunk to data/pos_ner if you want to record POS + NER results.
+
 Run show_result.py to see the test results per model in this directory.
 
 ### Using NER
