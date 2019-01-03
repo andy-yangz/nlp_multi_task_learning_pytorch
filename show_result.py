@@ -1,11 +1,13 @@
+import argparse
 import os
 from glob import glob
 
 import torch
 
-path = './result'
-file_paths = [y for x in os.walk(path) for y in glob(os.path.join(x[0], '*.pt'))]
-
+parser = argparse.ArgumentParser()
+parser.add_argument('--input_path', default='result/')
+args = parser.parse_args()
+file_paths = [y for x in os.walk(args.input_path) for y in glob(os.path.join(x[0], '*.pt'))]
 results = []
 for file_path in file_paths:
     if 'result.pt' in file_path:
