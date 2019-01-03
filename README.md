@@ -33,7 +33,7 @@ python format_data.py --input_path pos_chunk_ner/ --output_path pos_ner/ --ner
 ## Usage
 ```bash
 mkdir result/
-bash run.sh data/pos_chunk/
+bash run.sh data/pos_chunk/ # Swap run.sh to run_bidirectional.sh to benchmark bidirectional models
 ```
 
 This will create a folder called result/ containing all the pth files containing the models/results. Change data/pos_chunk to data/pos_ner if you want to record POS + NER results.
