@@ -14,7 +14,7 @@ from util import *
 parser = argparse.ArgumentParser(description='Pytorch NLP multi-task leraning for POS tagging and Chunking.')
 parser.add_argument('--data', type=str, default='./data',
                     help='data file')
-parser.add_argument('--emsize', type=int, default=200,
+parser.add_argument('--emsize', type=int, default=300,
                     help='size of word embeddings') 
 parser.add_argument('--npos_layers', type=int, default=1,
                     help='number of POS tagging layers')
@@ -48,6 +48,8 @@ parser.add_argument('--test_times', type=int, default=1,
                     help='run several times to get trustable result.')
 parser.add_argument('--save', type=str, default='model.pt',
                     help='path to save the final model')
+parser.add_argument('--pretrained_embeddings', dest='pretrained_embeddings', action='store_true',
+                    help='Use pretrained embeddings')
 parser.add_argument('--seed', type=int, default=123,
                     help='Seed for torch.')
 args = parser.parse_args()
@@ -167,11 +169,14 @@ for i in range(args.test_times):
     nwords = corpus.word_dict.nwords
     npos_tags = corpus.pos_dict.nwords
     nchunk_tags = corpus.chunk_dict.nwords
-    
+    pretrained_embeddings = None
+    if args.pretrained_embeddings:
+        import torchtext
+        pretrained_embeddings = torchtext.vocab.GloVe()
     if args.train_mode == 'Joint':
         model = JointModel(nwords, args.emsize, args.nhid, npos_tags, args.npos_layers,
                            nchunk_tags, args.nchunk_layers, args.dropout, bi=args.bi, 
-                           train_mode=args.train_mode)
+                           train_mode=args.train_mode, pretrained_vectors=pretrained_embeddings, vocab=corpus.word_dict)
     else:
         if args.train_mode == 'POS':
             ntags = npos_tags
@@ -180,7 +185,8 @@ for i in range(args.test_times):
             ntags = nchunk_tags
             nlayers = args.nchunk_layers
         model = JointModel(nwords, args.emsize, args.nhid, ntags, nlayers,
-                           args.dropout, bi=args.bi, train_mode=args.train_mode)
+                           args.dropout, bi=args.bi, train_mode=args.train_mode,
+                           pretrained_vectors=pretrained_embeddings, vocab=corpus.word_dict)
     if args.cuda:
         model = model.cuda()
 
