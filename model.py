@@ -191,7 +191,7 @@ class JointModel(nn.Module):
                 print ("self.nlayers1 == self.nlayers2")
                 logits, hidden = self.rnn(input, hidden[0])
                 print ("logits:", logits.shape)
-                print ("hidden:", hidden.shape)
+                print ("hidden:", len(hidden))
                 outputs1 = self.linear1(logits)
                 print ("outputs1:", outputs1.shape)
                 outputs2 = self.linear2(logits)
@@ -219,7 +219,7 @@ class JointModel(nn.Module):
             print ("logits:", logits.shape)
             outputs = self.linear(logits)
             print ("outputs:", outputs.shape)
-            print ("return outputs, hidden:", outputs.shape, type(hidden))
+            print ("return outputs, hidden:", outputs[0].shape, outputs[1].shape len(hidden))
             return outputs, hidden
 
     def init_rnn2_hidden(self, batch_size):
