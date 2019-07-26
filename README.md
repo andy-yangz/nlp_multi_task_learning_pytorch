@@ -23,9 +23,9 @@ We use the conll2003 data found [here](https://github.com/Franck-Dernoncourt/Neu
 ```bash
 cd nlp_multi_task_learning_pytorch/data/
 mkdir pos_chunk_ner/
-wget https://github.com/Franck-Dernoncourt/NeuroNER/tree/master/neuroner/data/conll2003/en/test.txt -P pos_chunk_ner/
-wget https://github.com/Franck-Dernoncourt/NeuroNER/tree/master/neuroner/data/conll2003/en/valid.txt -P pos_chunk_ner/
-wget https://github.com/Franck-Dernoncourt/NeuroNER/tree/master/neuroner/data/conll2003/en/train.txt -P pos_chunk_ner/
+wget https://raw.githubusercontent.com/Franck-Dernoncourt/NeuroNER/master/neuroner/data/conll2003/en//test.txt -P pos_chunk_ner/
+wget https://raw.githubusercontent.com/Franck-Dernoncourt/NeuroNER/master/neuroner/data/conll2003/en/valid.txt -P pos_chunk_ner/
+wget https://raw.githubusercontent.com/Franck-Dernoncourt/NeuroNER/master/neuroner/data/conll2003/en/train.txt -P pos_chunk_ner/
 python format_data.py --input_path pos_chunk_ner/ --output_path pos_chunk/
 python format_data.py --input_path pos_chunk_ner/ --output_path pos_ner/ --ner
 ```
