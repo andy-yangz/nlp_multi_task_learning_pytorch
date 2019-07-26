@@ -72,7 +72,7 @@ else:
 # Training Funcitons
 ###############################################################################
 def train(loss_log):
-    
+    model.train() 
     if args.train_mode == 'Joint':
         target_data = (corpus.pos_train, corpus.chunk_train)
     elif args.train_mode == 'POS':
