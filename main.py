@@ -218,11 +218,11 @@ for i in range(args.test_times):
             print('-'*50)
             if args.train_mode == 'Joint':
                 print('| end of epoch {:3d} | valid loss {:5.3f} | POS accuracy {:5.3f} | Chunk accuracy {:5.3}'.format(
-                    epoch, val_loss.data.cpu().numpy()[0], accuracy[0], accuracy[1]
+                    epoch, val_loss.data.cpu().numpy(), accuracy[0], accuracy[1]
                 ))
             else:
                 print('| end of epoch {:3d} | valid loss {:5.3f} | accuracy {:5.3f} |'.format(
-                    epoch, val_loss.data.cpu().numpy()[0], accuracy
+                    epoch, val_loss.data.cpu().numpy(), accuracy
                 ))
             if not best_val_loss or (val_loss.data[0] < best_val_loss):
                 with open(args.save.strip() + '.pt', 'wb') as f:
@@ -259,11 +259,11 @@ for i in range(args.test_times):
     print("Evaluating on test data.")
     if args.train_mode == 'Joint':
         print('| end of epoch {:3d} | test loss {:5.3f} | POS test accuracy {:5.3f} | Chunk test accuracy {:5.3}'.format(
-            epoch, test_loss.data.cpu().numpy()[0], test_accuracy[0], test_accuracy[1]
+            epoch, test_loss.data.cpu().numpy(), test_accuracy[0], test_accuracy[1]
         ))
     else:
         print('| end of epoch {:3d} | test loss {:5.3f} | accuracy {:5.3f} |'.format(
-            epoch, test_loss.data.cpu().numpy()[0], test_accuracy
+            epoch, test_loss.data.cpu().numpy(), test_accuracy
         ))
     
     # Log Accuracy
