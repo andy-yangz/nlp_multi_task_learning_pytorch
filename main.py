@@ -224,10 +224,10 @@ for i in range(args.test_times):
                 print('| end of epoch {:3d} | valid loss {:5.3f} | accuracy {:5.3f} |'.format(
                     epoch, val_loss.data.cpu().numpy(), accuracy
                 ))
-            if not best_val_loss or (val_loss.data[0] < best_val_loss):
+            if not best_val_loss or (val_loss.item() < best_val_loss):
                 with open(args.save.strip() + '.pt', 'wb') as f:
                     torch.save(model, f)
-                best_val_loss = val_loss.data[0]
+                best_val_loss = val_loss.item()
                 best_accuracy = accuracy
                 best_epoch = epoch
                 early_stop_count = 0
