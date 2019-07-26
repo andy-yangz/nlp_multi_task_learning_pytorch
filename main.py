@@ -114,7 +114,7 @@ def train(loss_log):
         
         if iteration % args.log_interval == 0:
             cur_loss = total_loss / args.log_interval
-            cur_loss = cur_loss.cpu().numpy()[0]
+            cur_loss = cur_loss.cpu().numpy()
             elapsed = time.time() - start_time
             print('| epoch {:3d} | {:5d}/{:5d} iteration | {:5.2f} ms/batch | loss {:5.2f} |'.format(
                 epoch, iteration, n_iteration,
