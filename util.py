@@ -26,7 +26,8 @@ def get_batch(source, *targets, batch_size, seq_len=10, cuda=False, evalu=False)
     for i in range(source.size(0) // seq_len):
         ys = []
         #with torch.no_grad():
-        X = Variable(source[i*seq_len:(i+1)*seq_len])
+        #X = Variable(source[i*seq_len:(i+1)*seq_len])
+        X = Variable(source[i*seq_len:(i+1)*seq_len], volatile=evalu)
         for target in targets:
             ys.append(Variable(target[i*seq_len:(i+1)*seq_len]))
         yield X, ys
