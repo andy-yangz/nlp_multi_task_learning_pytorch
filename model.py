@@ -219,7 +219,7 @@ class JointModel(nn.Module):
             print ("logits:", logits.shape)
             outputs = self.linear(logits)
             print ("outputs:", outputs.shape)
-            print ("return outputs, hidden:", outputs[0].shape, outputs[1].shape len(hidden))
+            print ("return outputs, hidden:", outputs[0].shape, outputs[1].shape, len(hidden))
             return outputs, hidden
 
     def init_rnn2_hidden(self, batch_size):
