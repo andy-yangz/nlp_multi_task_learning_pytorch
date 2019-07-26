@@ -74,24 +74,28 @@ else:
 def train(loss_log):
     model.train() 
     if args.train_mode == 'Joint':
+        print ("Joint")
         target_data = (corpus.pos_train, corpus.chunk_train)
     elif args.train_mode == 'POS':
+        print ("POS")
         target_data = (corpus.pos_train, )
     elif args.train_mode == 'Chunk':
+        print ("Chunk")
         target_data = (corpus.chunk_train, )
 
     # Turn on training mode
     total_loss = 0
     start_time = time.time()
     n_iteration = corpus.word_train.size(0) // (args.batch_size*args.seq_len) 
+    print ("number of iterations ", n_iteration) 
     iteration = 0
     for X, ys in get_batch(corpus.word_train, *target_data, batch_size=args.batch_size,
                            seq_len=args.seq_len, cuda=args.cuda):
-        print ("X:",X)
+        print ("X:",X.shape)
         iteration += 1
         model.zero_grad()
         if args.train_mode == 'Joint':
-            print ("Joint")
+            #print ("Joint")
             if args.npos_layers == args.nchunk_layers:
                 hidden = model.rnn.init_hidden(args.batch_size)
                 outputs1, outputs2, hidden = model(X, hidden)
@@ -103,11 +107,14 @@ def train(loss_log):
             loss2 = criterion(outputs2.view(-1, nchunk_tags), ys[1].view(-1))
             loss = loss1 + loss2
         else:
-            print ("Not Joint")
+            #print ("Not Joint")
             hidden = model.rnn.init_hidden(args.batch_size)
+            if iteration % args.log_interval == 0:
+                print ("hidden", hidden.shape)
             outputs, hidden = model(X, hidden)
             loss = criterion(outputs.view(-1, ntags), ys[0].view(-1))
-            print ("loss:", loss)
+            if iteration % args.log_interval == 0:
+                print ("loss:", loss)
 
         loss.backward() 
         
@@ -184,10 +191,14 @@ for i in range(args.test_times):
     else:
         if args.train_mode == 'POS':
             ntags = npos_tags
+            print ("ntags:", ntags)
             nlayers = args.npos_layers
+            print ("nlayers:", nlayers)
         elif args.train_mode == 'Chunk':
             ntags = nchunk_tags
+            print ("ntags:", ntags)
             nlayers = args.nchunk_layers
+            print ("nlayers:", nlayers)
         model = JointModel(nwords, args.emsize, args.nhid, ntags, nlayers,
                            args.dropout, bi=args.bi, train_mode=args.train_mode,
                            pretrained_vectors=pretrained_embeddings, vocab=corpus.word_dict)
