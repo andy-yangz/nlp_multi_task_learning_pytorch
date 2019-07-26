@@ -110,7 +110,7 @@ def train(loss_log):
             #print ("Not Joint")
             hidden = model.rnn.init_hidden(args.batch_size)
             if iteration % args.log_interval == 0:
-                print ("hidden", hidden.shape)
+                print ("hidden", hidden[0].shape, hidden[1].shape)
             outputs, hidden = model(X, hidden)
             loss = criterion(outputs.view(-1, ntags), ys[0].view(-1))
             if iteration % args.log_interval == 0:
