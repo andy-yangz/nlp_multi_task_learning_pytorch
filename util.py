@@ -2,7 +2,7 @@ import torch
 from torch.autograd import Variable
 
 
-def get_batch(source, *targets, batch_size, seq_len=10, cuda=False, evalu=False):
+def get_batch(source, *targets, batch_size, seq_len=10, cuda=False, evalu=True):
     """Generate batch from the raw data."""
     nbatch = source.size(0) // batch_size
     shuffle_mask = torch.randperm(batch_size)
@@ -26,7 +26,7 @@ def get_batch(source, *targets, batch_size, seq_len=10, cuda=False, evalu=False)
     for i in range(source.size(0) // seq_len):
         ys = []
 
-        if evalu is True:
+        if evalu is False:
             with torch.no_grad():
                 X = Variable(source[i*seq_len:(i+1)*seq_len])
         else:
