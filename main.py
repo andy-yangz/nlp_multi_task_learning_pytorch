@@ -87,9 +87,11 @@ def train(loss_log):
     iteration = 0
     for X, ys in get_batch(corpus.word_train, *target_data, batch_size=args.batch_size,
                            seq_len=args.seq_len, cuda=args.cuda):
+        print ("X:",X)
         iteration += 1
         model.zero_grad()
         if args.train_mode == 'Joint':
+            print ("Joint")
             if args.npos_layers == args.nchunk_layers:
                 hidden = model.rnn.init_hidden(args.batch_size)
                 outputs1, outputs2, hidden = model(X, hidden)
@@ -101,9 +103,11 @@ def train(loss_log):
             loss2 = criterion(outputs2.view(-1, nchunk_tags), ys[1].view(-1))
             loss = loss1 + loss2
         else:
+            print ("Not Joint")
             hidden = model.rnn.init_hidden(args.batch_size)
             outputs, hidden = model(X, hidden)
             loss = criterion(outputs.view(-1, ntags), ys[0].view(-1))
+            print ("loss:", loss)
 
         loss.backward() 
         

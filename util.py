@@ -27,9 +27,12 @@ def get_batch(source, *targets, batch_size, seq_len=10, cuda=False, evalu=True):
         ys = []
 
         if evalu is False:
+            print ("evalu is False")
             with torch.no_grad():
+                print ("torch.no_grad for X variable")
                 X = Variable(source[i*seq_len:(i+1)*seq_len])
         else:
+            print ("evalu is True. x should be trainable")
             X = Variable(source[i*seq_len:(i+1)*seq_len])
 
         for target in targets:
