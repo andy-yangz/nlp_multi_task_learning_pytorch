@@ -108,7 +108,7 @@ def train(loss_log):
         loss.backward() 
         
         # Prevent the exploding gradient
-        torch.nn.utils.clip_grad_norm(model.parameters(), args.clip)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
         optimizer.step()
         total_loss += loss.data
         
