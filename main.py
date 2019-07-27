@@ -156,9 +156,13 @@ def evaluate(source, target):
             # Make predict and calculate accuracy
             _, pred1 = outputs1.data.topk(1)
             _, pred2 = outputs2.data.topk(1)
-            accuracy1 = torch.sum(pred1.squeeze(2) == y_vals[0].data) / (y_vals[0].size(0) * y_vals[0].size(1))
-            accuracy2 = torch.sum(pred2.squeeze(2) == y_vals[1].data) / (y_vals[1].size(0) * y_vals[1].size(1))
-            accuracy = (accuracy1, accuracy2)
+            equal1 = torch.sum(pred1.squeeze(2) == y_vals[0].data).item()
+            equal2 = torch.sum(pred2.squeeze(2) == y_vals[1].data).item()
+            accuracy1 = equal1 / (y_vals[0].size(0) * y_vals[0].size(1))
+            accuracy2 = equal2 / (y_vals[1].size(0) * y_vals[1].size(1))
+            accuracy1_tensor = torch.tensor([accuracy1], dtype=torch.float64)
+            accuracy2_tensor = torch.tensor([accuracy2], dtype=torch.float64)
+            accuracy = (accuracy1_tensor, accuracy2_tensor)
         else:
             hidden = model.rnn.init_hidden(args.batch_size)
             outputs, hidden = model(X_val, hidden)
