@@ -165,6 +165,7 @@ def evaluate(source, target):
             loss = criterion(outputs.view(-1, ntags), y_vals[0].view(-1))
             _, pred = outputs.data.topk(1)
             accuracy = torch.sum(pred.squeeze(2) == y_vals[0].data) / (y_vals[0].size(0) * y_vals[0].size(1))
+            print ("evaluate/accuracy:", accuracy)
         total_loss += loss
          
     return total_loss/n_iteration, accuracy
@@ -230,13 +231,13 @@ for i in range(args.test_times):
                 valid_target_data = (corpus.chunk_valid, ) 
             
             val_loss, accuracy = evaluate(corpus.word_valid, valid_target_data)
-            val_loss = 1.0*val_loss
-            accuracy[0] = 1.0*accuracy[0]
-            accuracy[1] = 1.0*accuracy[1]
             print('-'*50)
             if args.train_mode == 'Joint':
+                val_loss = 1.0*val_loss
+                accuracy0 = 1.0*accuracy[0]
+                accuracy1 = 1.0*accuracy[1]
                 print('| end of epoch {:3d} | valid loss {:5.3f} | POS accuracy {:5.3f} | Chunk accuracy {:5.3}'.format(
-                    epoch, val_loss.data.cpu().numpy(), accuracy[0], accuracy[1]
+                    epoch, val_loss.data.cpu().numpy(), accuracy0, accuracy1
                 ))
             else:
                 print('| end of epoch {:3d} | valid loss {:5.3f} | accuracy {:5.3f} |'.format(
