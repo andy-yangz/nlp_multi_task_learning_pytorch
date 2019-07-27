@@ -237,7 +237,7 @@ for i in range(args.test_times):
                 accuracy0 = 1.0*accuracy[0]
                 accuracy1 = 1.0*accuracy[1]
                 print('| end of epoch {:3d} | valid loss {:5.3f} | POS accuracy {:5.3f} | Chunk accuracy {:5.3}'.format(
-                    epoch, val_loss.data.cpu().numpy(), accuracy0, accuracy1
+                    epoch, val_loss.data, accuracy0, accuracy1
                 ))
             else:
                 print('| end of epoch {:3d} | valid loss {:5.3f} | accuracy {:5.3f} |'.format(
