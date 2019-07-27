@@ -127,8 +127,8 @@ class JointModel(nn.Module):
             self.nlayers2 = args[3]
             print ("self.ntags1:", self.ntags1)
             print ("self.ntags2:", self.ntags2)
-            print ("self.ntags3:", self.ntags3)
-            print ("self.ntags4:", self.ntags4)
+            print ("self.nlayers1:", self.nlayers1)
+            print ("self.nlayers1:", self.nlayers2)
             if self.nlayers1 == self.nlayers2:
                 print ("  self.nlayers1:", self.nlayers1)
                 print ("  self.nlayers2:", self.nlayers2)
