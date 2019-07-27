@@ -200,13 +200,15 @@ class JointModel(nn.Module):
                 return outputs1, outputs2, hidden
             else:
                 logits1, hidden1 = self.rnn1(input, hidden[0])
-                print ("hidden1:", hidden1.shape)
+                print ("hidden1[0]:", hidden1[0].shape)
+                print ("hidden1[1]:", hidden1[1].shape)
                 print ("logits1:", logits1.shape)
                 self.rnn2.flatten_parameters()
                 print ("self.rnn2, flatten params:", self.rnn2)
                 logits2, hidden2 = self.rnn2(logits1, hidden[1])
+                print ("hidden2[0]:", hidden2[0].shape)
+                print ("hidden2[1]:", hidden2[1].shape)
                 print ("logits2:", logits2.shape)
-                print ("hidden2:", hidden2.shape)
                 outputs1 = self.linear1(logits1)
                 print ("outputs1:", outputs1.shape)
                 outputs2 = self.linear2(logits2)
