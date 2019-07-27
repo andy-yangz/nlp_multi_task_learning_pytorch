@@ -230,6 +230,9 @@ for i in range(args.test_times):
                 valid_target_data = (corpus.chunk_valid, ) 
             
             val_loss, accuracy = evaluate(corpus.word_valid, valid_target_data)
+            val_loss = 1.0*val_loss
+            accuracy[0] = 1.0*accuracy[0]
+            accuracy[1] = 1.0*accuracy[1]
             print('-'*50)
             if args.train_mode == 'Joint':
                 print('| end of epoch {:3d} | valid loss {:5.3f} | POS accuracy {:5.3f} | Chunk accuracy {:5.3}'.format(
