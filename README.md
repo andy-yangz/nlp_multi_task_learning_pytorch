@@ -18,7 +18,7 @@ We highly suggest using a CUDA based machine.
 
 ## Data
 
-We use the conll2003 data found [here](https://github.com/Franck-Dernoncourt/NeuroNER/tree/master/data/conll2003/en). Follow the below instructions to format the data correctly:
+We use the conll2003 data found [here](https://github.com/Franck-Dernoncourt/NeuroNER/tree/master/neuroner/data/conll2003/en). Follow the below instructions to format the data correctly:
 
 ```bash
 cd nlp_multi_task_learning_pytorch/data/
