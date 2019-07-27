@@ -236,8 +236,8 @@ for i in range(args.test_times):
                 val_loss = 1.0*val_loss
                 print ("epoch:", epoch)
                 print ("val_loss:", val_loss)
-                print ("accuracy0:", accuracy0)
-                print ("accuracy1:", accuracy1)
+                print ("accuracy0:", accuracy[0])
+                print ("accuracy1:", accuracy[0])
                 accuracy0 = 1.0*accuracy[0]
                 accuracy1 = 1.0*accuracy[1]
                 print('| end of epoch {:3d} | valid loss {:5.3f} | POS accuracy {:5.3f} | Chunk accuracy {:5.3}'.format(
