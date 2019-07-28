@@ -92,6 +92,7 @@ def train(loss_log):
     for X, ys in get_batch(corpus.word_train, *target_data, batch_size=args.batch_size,
                            seq_len=args.seq_len, cuda=args.cuda):
         print ("X:",X.shape)
+        print ("y:", len(ys))
         iteration += 1
         model.zero_grad()
         if args.train_mode == 'Joint':
@@ -101,11 +102,22 @@ def train(loss_log):
                 outputs1, outputs2, hidden = model(X, hidden)
             else:
                 hidden1 = model.rnn1.init_hidden(args.batch_size)
+                print("init hidden1:", hidden1[0].shape, hidden1[1].shape )
                 hidden2 = model.init_rnn2_hidden(args.batch_size)
-                outputs1, outputs2, hidden1, hidden2 = model(X, hidden1, hidden2)    
+                print("init hidden2:", hidden2[0].shape, hidden2[1].shape )
+                outputs1, outputs2, hidden1, hidden2 = model(X, hidden1, hidden2)
+                print ("returned: outputs1, outputs2, hidden1, hidden2")
+
             loss1 = criterion(outputs1.view(-1, npos_tags), ys[0].view(-1))
+            print ("outputs1.view(-1, npos_tags):", outputs1.view(-1, npos_tags).shape)
+            print ("ys[0].view(-1):", ys[0].view(-1).shape)
+            print ("loss1:", loss1)
             loss2 = criterion(outputs2.view(-1, nchunk_tags), ys[1].view(-1))
+            print ("outputs2.view(-1, npos_tags):", outputs2.view(-1, npos_tags).shape)
+            print ("ys[1].view(-1):", ys[1].view(-1).shape)
+            print ("loss2:", loss2)
             loss = loss1 + loss2
+            print ("loss:", loss)
         else:
             #print ("Not Joint")
             hidden = model.rnn.init_hidden(args.batch_size)
@@ -138,6 +150,7 @@ def train(loss_log):
 
 def evaluate(source, target):
     model.eval()
+    print ("evaluate")
     n_iteration = source.size(0) // (args.batch_size*args.seq_len)
     total_loss = 0
     for X_val, y_vals in get_batch(source, *target, batch_size=args.batch_size,
@@ -171,7 +184,7 @@ def evaluate(source, target):
             accuracy = torch.sum(pred.squeeze(2) == y_vals[0].data) / (y_vals[0].size(0) * y_vals[0].size(1))
             print ("evaluate/accuracy:", accuracy)
         total_loss += loss
-         
+    print ("end evaluate")
     return total_loss/n_iteration, accuracy
 
 best_val_accuracies = []
