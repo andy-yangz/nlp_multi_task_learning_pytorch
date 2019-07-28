@@ -299,11 +299,11 @@ for i in range(args.test_times):
     print("Evaluating on test data.")
     if args.train_mode == 'Joint':
         print('| end of epoch {:3d} | test loss {:5.3f} | POS test accuracy {:5.3f} | Chunk test accuracy {:5.3}'.format(
-            epoch, test_loss.item(), test_accuracy[0], test_accuracy[1]
+            epoch, test_loss.item(), test_accuracy[0].item() test_accuracy[1].item()
         ))
     else:
         print('| end of epoch {:3d} | test loss {:5.3f} | accuracy {:5.3f} |'.format(
-            epoch, test_loss.data.cpu().numpy(), test_accuracy
+            epoch, test_loss.item(), test_accuracy
         ))
     
     # Log Accuracy
