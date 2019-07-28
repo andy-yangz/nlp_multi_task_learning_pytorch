@@ -113,8 +113,8 @@ def train(loss_log):
             print ("ys[0].view(-1):", ys[0].view(-1).shape)
             print ("loss1:", loss1)
             loss2 = criterion(outputs2.view(-1, nchunk_tags), ys[1].view(-1))
-            print ("outputs2.view(-1, npos_tags):", (outputs2.view(-1, npos_tags)).shape)
-            print ("ys[1].view(-1):", (ys[1].view(-1)).shape)
+            #print ("outputs2.view(-1, npos_tags):", (outputs2.view(-1, npos_tags)).shape)
+            #print ("ys[1].view(-1):", (ys[1].view(-1)).shape)
             print ("loss2:", loss2)
             loss = loss1 + loss2
             print ("loss:", loss)
