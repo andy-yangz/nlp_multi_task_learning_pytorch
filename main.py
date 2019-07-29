@@ -98,9 +98,11 @@ def train(loss_log):
         if args.train_mode == 'Joint':
             #print ("Joint")
             if args.npos_layers == args.nchunk_layers:
+                print ("Joint in same layer")
                 hidden = model.rnn.init_hidden(args.batch_size)
                 outputs1, outputs2, hidden = model(X, hidden)
             else:
+                print ("Joint in different layers")
                 hidden1 = model.rnn1.init_hidden(args.batch_size)
                 print("init hidden1:", hidden1[0].shape, hidden1[1].shape )
                 hidden2 = model.init_rnn2_hidden(args.batch_size)

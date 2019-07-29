@@ -208,9 +208,14 @@ class JointModel(nn.Module):
             else:
                 print ("different layers")
                 #for lstm, we have 3 outputs: output, (h_n, c_n)
+                #see https://stackoverflow.com/questions/48302810/whats-the-difference-between-hidden-and-output-in-pytorch-lstm
                 logits1, hidden1 = self.rnn1(input, hidden[0])
-                print ("hidden1[0]:", hidden1[0].shape)
-                print ("hidden1[1]:", hidden1[1].shape)
+                if (self.rnn_type == 'LSTM'):
+                    print ("hidden1[0]:", hidden1[0].shape) #h_n
+                    print ("hidden1[1]:", hidden1[1].shape) #c_n
+                else:
+                    print("hidden1:", hidden1.shape)
+
                 print ("logits1:", logits1.shape)
                 self.rnn2.flatten_parameters()
                 print ("self.rnn2, flatten params:", self.rnn2)
