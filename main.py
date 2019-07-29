@@ -209,14 +209,14 @@ for i in range(args.test_times):
     else:
         if args.train_mode == 'POS':
             ntags = npos_tags
-            print ("ntags:", ntags)
+            print ("ntags (POS):", ntags)
             nlayers = args.npos_layers
-            print ("nlayers:", nlayers)
+            print ("nlayers (POS):", nlayers)
         elif args.train_mode == 'Chunk':
             ntags = nchunk_tags
-            print ("ntags:", ntags)
+            print ("ntags (Chunk):", ntags)
             nlayers = args.nchunk_layers
-            print ("nlayers:", nlayers)
+            print ("nlayers (Chunk):", nlayers)
         model = JointModel(nwords, args.emsize, args.nhid, ntags, nlayers,
                            args.dropout, bi=args.bi, train_mode=args.train_mode,
                            pretrained_vectors=pretrained_embeddings, vocab=corpus.word_dict)
@@ -253,8 +253,9 @@ for i in range(args.test_times):
                 val_loss = 1.0*val_loss
                 print ("epoch:", epoch)
                 print ("val_loss:", val_loss)
+                print ("accuracy len:", len(accuracy))
                 print ("accuracy0:", accuracy[0])
-                print ("accuracy1:", accuracy[0])
+                print ("accuracy1:", accuracy[1])
                 accuracy0 = 1.0*accuracy[0]
                 accuracy1 = 1.0*accuracy[1]
                 print('| end of epoch {:3d} | valid loss {:5.3f} | POS accuracy {:5.3f} | Chunk accuracy {:5.3}'.format(

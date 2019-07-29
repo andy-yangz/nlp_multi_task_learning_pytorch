@@ -130,19 +130,25 @@ class JointModel(nn.Module):
             print ("self.nlayers1:", self.nlayers1)
             print ("self.nlayers2:", self.nlayers2)
             if self.nlayers1 == self.nlayers2:
+                print ("joint training, in the same layer")
                 print ("  self.nlayers1:", self.nlayers1)
                 print ("  self.nlayers2:", self.nlayers2)
                 self.rnn = EncoderModel(ntoken, emsize, nhid, self.nlayers1, 
                                         dropout, rnn_type, bi, pretrained_vectors, vocab)
                 print ("self.rnn:", self.rnn)
             else:
+                print ("joint training, in different layers")
                 print ("  self.nlayers1:", self.nlayers1)
                 print ("  self.nlayers2:", self.nlayers2)
                 # Lower layer
+                print ("rnn1 : Lower layer")
+                print ("EncoderModel")
                 self.rnn1 = EncoderModel(ntoken, emsize, nhid, self.nlayers1, 
                                          dropout, rnn_type, bi, pretrained_vectors, vocab)
                 print ("self.rnn1:", self.rnn1)
                 # Higher layer
+                print ("rnn2: Higher layer")
+                print (rnn_type)
                 if rnn_type == 'LSTM':
                     self.rnn2 = nn.LSTM(nhid*(1+int(bi)), nhid, 
                                         self.nlayers2 - self.nlayers1, 
@@ -186,6 +192,7 @@ class JointModel(nn.Module):
         if self.train_mode == 'Joint':
             print ("Joind mode")
             if self.nlayers1 == self.nlayers2:
+                print ("same layer")
                 print ("self.nlayers1:", self.nlayers1)
                 print ("self.nlayers2:", self.nlayers2)
                 print ("self.nlayers1 == self.nlayers2")
@@ -199,6 +206,8 @@ class JointModel(nn.Module):
                 print ("return output1, output2, hidden:", outputs1.shape, outputs2.shape, len(hidden))
                 return outputs1, outputs2, hidden
             else:
+                print ("different layers")
+                #for lstm, we have 3 outputs: output, (h_n, c_n)
                 logits1, hidden1 = self.rnn1(input, hidden[0])
                 print ("hidden1[0]:", hidden1[0].shape)
                 print ("hidden1[1]:", hidden1[1].shape)
