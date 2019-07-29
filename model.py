@@ -128,7 +128,7 @@ class JointModel(nn.Module):
             print ("self.ntags1:", self.ntags1)
             print ("self.ntags2:", self.ntags2)
             print ("self.nlayers1:", self.nlayers1)
-            print ("self.nlayers1:", self.nlayers2)
+            print ("self.nlayers2:", self.nlayers2)
             if self.nlayers1 == self.nlayers2:
                 print ("  self.nlayers1:", self.nlayers1)
                 print ("  self.nlayers2:", self.nlayers2)
